@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notes</title>
+  <meta name="theme-color" content="#4f46e5" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="icon.svg" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="layout">
+    <!-- ================= SIDEBAR ================= -->
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-head">
+        <h1>Notes</h1>
+        <button id="toggleSidebarBtn" class="icon-btn" title="Hide sidebar">&laquo;</button>
+      </div>
+
+      <button id="newNoteBtn" class="btn primary block">+ New Note</button>
+
+      <nav class="side-nav">
+        <button class="side-item" data-view="all"><span>All Notes</span><span class="badge" id="countAll"></span></button>
+        <button class="side-item" data-view="pinned"><span>&#128204; Pinned</span><span class="badge" id="countPinned"></span></button>
+      </nav>
+
+      <div class="side-section">
+        <div class="side-label">Notebooks</div>
+        <div id="notebookList" class="side-list"></div>
+      </div>
+
+      <div class="side-section">
+        <div class="side-label">Tags</div>
+        <div id="tagList" class="side-list"></div>
+      </div>
+
+      <nav class="side-nav" style="margin-top:auto">
+        <button class="side-item" data-view="trash"><span>&#128465; Trash</span><span class="badge" id="countTrash"></span></button>
+        <button id="graphBtn" class="side-item"><span>&#128279; Graph</span></button>
+        <button id="settingsBtn" class="side-item"><span>&#9881; Settings</span></button>
+      </nav>
+
+      <footer class="sidebar-foot">
+        <button id="backupBtn" class="side-item"><span>&#128190; Backup</span></button>
+        <button id="restoreBtn" class="side-item"><span>&#128194; Restore</span></button>
+      </footer>
+    </aside>
+
+    <!-- ================= MAIN ================= -->
+    <main class="main">
+      <header class="app-header">
+        <button id="openSidebarBtn" class="icon-btn hidden" title="Show sidebar">&raquo;</button>
+        <div>
+          <h2 id="viewTitle">All Notes</h2>
+          <span id="viewSub" class="muted"></span>
+        </div>
+        <div class="header-actions">
+          <button id="darkBtn" class="icon-btn" title="Toggle dark mode">&#9789;</button>
+          <button id="paletteBtn" class="btn ghost" title="Command palette (Ctrl+K)">Ctrl+K</button>
+        </div>
+      </header>
+
+      <div class="search-row">
+        <input id="searchInput" type="text" placeholder="Search notes... (try #tag)" autocomplete="off" />
+      </div>
+
+      <section id="notesGrid" class="notes-grid"></section>
+
+      <div id="emptyState" class="empty hidden">
+        <p>No notes here yet.</p>
+      </div>
+    </main>
+  </div>
+
+  <!-- ================= EDITOR ================= -->
+  <div id="overlay" class="overlay hidden"></div>
+  <aside id="editor" class="editor hidden">
+    <div class="editor-tabs">
+      <button id="tabWrite" class="tab active">Write</button>
+      <button id="tabPreview" class="tab">Preview</button>
+      <span class="spacer"></span>
+      <button id="closeEditorBtn" class="icon-btn" title="Close">&times;</button>
+    </div>
+
+    <div id="writePane">
+      <input id="noteTitle" type="text" placeholder="Title" autocomplete="off" />
+      <textarea id="noteBody" placeholder="Write your note here... Markdown supported: **bold**, # heading, `code`, [[backlink]]"></textarea>
+    </div>
+    <div id="previewPane" class="preview hidden"></div>
+
+    <div class="editor-meta">
+      <input id="tagInput" type="text" placeholder="Tags: work, ideas" autocomplete="off" />
+      <div class="meta-row">
+        <select id="notebookSelect"><option value="">No notebook</option></select>
+        <div id="colorSwatches" class="swatches" title="Note color">
+          <button class="swatch" data-c=""></button>
+          <button class="swatch" data-c="#f59e0b"></button>
+          <button class="swatch" data-c="#10b981"></button>
+          <button class="swatch" data-c="#3b82f6"></button>
+          <button class="swatch" data-c="#a855f7"></button>
+          <button class="swatch" data-c="#ef4444"></button>
+        </div>
+      </div>
+      <div class="meta-row">
+        <input id="dueDate" type="datetime-local" title="Reminder" />
+        <label class="pin-toggle">
+          <input id="pinToggle" type="checkbox" />
+          <span>&#128204; Pin</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="editor-footer">
+      <span id="noteStats" class="muted"></span>
+      <div class="editor-actions">
+        <button id="shareBtn" class="btn ghost" title="Share via link">&#128279;</button>
+        <button id="exportBtn" class="btn ghost" title="Export">&#11015;</button>
+        <button id="deleteBtn" class="btn danger hidden">Delete</button>
+        <button id="saveBtn" class="btn primary">Save</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ================= COMMAND PALETTE ================= -->
+  <div id="paletteOverlay" class="overlay hidden"></div>
+  <div id="palette" class="palette hidden">
+    <input id="paletteInput" type="text" placeholder="Type a command or search notes..." autocomplete="off" />
+    <div id="paletteList" class="palette-list"></div>
+  </div>
+
+  <!-- ================= GRAPH ================= -->
+  <div id="graphOverlay" class="overlay hidden"></div>
+  <div id="graphModal" class="modal hidden">
+    <div class="modal-head">
+      <h3>Note Graph</h3>
+      <button id="graphClose" class="icon-btn">&times;</button>
+    </div>
+    <div id="graphCanvas"></div>
+    <p class="muted small">Lines = [[backlinks]] between notes. Click a node to open.</p>
+  </div>
+
+  <!-- ================= SHARE ================= -->
+  <div id="shareOverlay" class="overlay hidden"></div>
+  <div id="shareModal" class="modal hidden">
+    <div class="modal-head">
+      <h3>Share Note</h3>
+      <button id="shareClose" class="icon-btn">&times;</button>
+    </div>
+    <p class="muted">Copy this link. Anyone who opens it sees a read-only version and can save it to their own notes.</p>
+    <div class="share-box">
+      <input id="shareUrl" type="text" readonly />
+      <button id="copyBtn" class="btn primary">Copy</button>
+    </div>
+  </div>
+
+  <!-- ================= SETTINGS ================= -->
+  <div id="settingsOverlay" class="overlay hidden"></div>
+  <div id="settingsModal" class="modal hidden">
+    <div class="modal-head">
+      <h3>Settings</h3>
+      <button id="settingsClose" class="icon-btn">&times;</button>
+    </div>
+    <label class="setting-row">
+      <span>Dark mode</span>
+      <input id="settingsDark" type="checkbox" />
+    </label>
+    <label class="setting-row">
+      <span>Enable reminders &amp; notifications</span>
+      <button id="notifyBtn" class="btn ghost">Enable</button>
+    </label>
+    <label class="setting-row">
+      <span>Keyboard shortcuts</span>
+      <span class="muted small">Ctrl+K palette &middot; Ctrl+N new &middot; Ctrl+S save &middot; Ctrl+Z undo &middot; Ctrl+Shift+Z redo &middot; Esc close</span>
+    </label>
+  </div>
+
+  <!-- ================= SHARED VIEWER ================= -->
+  <div id="viewerOverlay" class="overlay hidden"></div>
+  <div id="viewer" class="viewer hidden">
+    <div class="modal-head">
+      <h3 id="viewerTitle"></h3>
+      <button id="viewerClose" class="icon-btn">&times;</button>
+    </div>
+    <div id="viewerBody" class="preview"></div>
+    <div class="modal-foot">
+      <button id="viewerSave" class="btn primary">Save to my notes</button>
+    </div>
+  </div>
+
+  <!-- ================= PRINT AREA ================= -->
+  <div id="printArea" class="print-area"></div>
+
+  <input type="file" id="importFile" accept=".json" hidden />
+
+  <script src="script.js"></script>
+</body>
+</html>
