@@ -1,5 +1,7 @@
 # Syskv Notes
 
+[![CI](https://github.com/Wishprogram01/Syskv/actions/workflows/ci.yml/badge.svg)](https://github.com/Wishprogram01/Syskv/actions/workflows/ci.yml)
+
 An advanced note-taking app — **React 19 + TypeScript** frontend, **Bun + ElysiaJS** backend, **PostgreSQL + Prisma** database.
 
 ## Tech Stack
