@@ -1,0 +1,40 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Note {
+  id        String    @id @default(uuid())
+  title     String    @default("")
+  body      String    @default("")
+  tags      String[]  @default([])
+  notebook  String    @default("")
+  color     String    @default("")
+  due       BigInt?
+  pinned    Boolean   @default(false)
+  trashed   Boolean   @default(false)
+  created   BigInt
+  updated   BigInt
+
+  @@index([trashed])
+  @@index([pinned])
+  @@index([notebook])
+  @@index([updated])
+  @@index([tags])
+}
+
+model Setting {
+  key   String  @id
+  value Json
+}
+
+model Notified {
+  noteId String @db.Text @map("note_id")
+  due    BigInt
+
+  @@id([noteId])
+  @@map("notified")
+}

@@ -1,79 +1,233 @@
 # Syskv Notes
 
-An **advanced** note-taking app built with plain HTML, CSS, and vanilla JavaScript. No build step, no backend — everything runs in your browser and stores notes in `localStorage`. This means **every feature works on static hosting like GitHub Pages**.
+An advanced note-taking app — **React 19 + TypeScript** frontend, **Bun + ElysiaJS** backend, **PostgreSQL + Prisma** database.
 
-## Features
+## Tech Stack
 
-### Core
-- Create, edit, and delete notes
-- Autosave while typing (800ms debounce)
-- Full-text search + fuzzy highlight, supports `#tag` search
-- Grid view with color-coded cards
+| Layer | Technology |
+|-------|-----------|
+| Frontend | React 19 + TypeScript + Vite |
+| Backend | Bun + ElysiaJS + Zod |
+| Database | PostgreSQL (via Prisma ORM) |
+| Data fetching | Custom hooks + TanStack-ready layout (`src/hooks`, `src/api`) |
+| API testing | Postman collection (`postman/`) |
+| Testing | Bun Test (unit + integration), Grafana k6 (load) |
 
-### Structure
-- **Notebooks** — organize notes, drag a card onto a notebook to move it
-- **Tags** — comma-separated, filterable from the sidebar
-- **Pinned notes** — always stay on top
-- **Trash** — move to trash, restore, or delete forever
+## Project Phases
 
-### Markdown
-- Live preview tab (headings, bold, italic, strike, code, lists, quotes, tables, links)
-- **Backlinks** — write `[[Another Note]]` and it becomes a clickable link
+Phases yang **telah selesai (✅)**, dikelaskan mengikut kategori. Setiap kategori ada fasa masing-masing.
 
-### Productivity
-- **Command Palette** (`Ctrl+K`) — new note, open note, dark mode, backup, graph, trash
-- **Reminders / notifications** — set a datetime on any note
-- **Keyboard shortcuts** — see below
-- **Undo / Redo** (`Ctrl+Z` / `Ctrl+Shift+Z`)
+### 🏗️ Pembangunan Teras (Phase 1–4)
 
-### Sharing & Data
-- **Share via link** — one click, receiver can "Save to my notes"
-- **Export** — download a note as `.md`, or full JSON backup
-- **Restore** — import a JSON backup
-- **Print / PDF** — prints a clean readable version
+| Phase | Layer / Tech | Status |
+|-------|--------------|--------|
+| **1** | Frontend — React 19 + TypeScript + Vite | ✅ |
+| **2** | Database — PostgreSQL (schema + Prisma models) | ✅ |
+| **3** | Backend — Bun + ElysiaJS + Zod (API) | ✅ |
+| **4** | ORM — Prisma Client (generation, db push, studio) | ✅ |
 
-### App
-- **Dark mode** (persisted)
-- **PWA** — installable, works fully offline
+### 🧪 Pengujian & API (Phase 5–7)
 
-## Keyboard Shortcuts
+| Phase | Layer / Tech | Status |
+|-------|--------------|--------|
+| **5** | API Testing — Postman (collection + environment) | ✅ |
+| **6** | Testing — Bun Test (unit + integration) | ✅ |
+| **7** | Load Testing — Grafana k6 | ✅ |
 
-| Key | Action |
-| --- | --- |
-| `Ctrl+K` | Command palette |
-| `Ctrl+N` | New note |
-| `Ctrl+S` | Save |
-| `Ctrl+Enter` | Save |
-| `Ctrl+Z` / `Ctrl+Shift+Z` | Undo / Redo |
-| `Ctrl+Shift+D` | Toggle dark mode |
-| `Esc` | Close |
+### 🐳 Containerization (Phase 8)
 
-## Files
+| Phase | Layer / Tech | Status |
+|-------|--------------|--------|
+| **8** | Container — Docker (Dockerfile + compose) | ✅ |
 
-- `index.html` — structure & modals
-- `style.css` — styling (light/dark, responsive)
-- `script.js` — all logic
-- `manifest.webmanifest`, `sw.js`, `icon.svg` — PWA
-- `README.md` — this file
+### ⏭️ Fasa Akan Datang
 
-## Usage
+| Phase | Layer / Tech | Status |
+|-------|--------------|--------|
+| **9** | DevOps — GitHub Actions (CI/CD) + Coolify (deploy) | ⏳ |
+| **10** | CDN — Cloudflare (performance + security) | ⏳ |
+| **11** | Monitoring — Pino + OpenTelemetry + Alloy + Loki + Tempo + Grafana | ⏳ |
 
-Open `index.html` in any browser, or serve the folder locally:
+**Catatan:**
+
+- **Bun phase** = **Phase 3** (Backend runtime). Bun Test pula = **Phase 6**.
+- **Docker phase** = **Phase 8** (Container).
+- **TanStack** = sebahagian **Phase 4** (data fetching/ORM) — belum dipasang, sedang menunggu.
+- Next: **Phase 9 — DevOps** (GitHub Actions + Coolify).
+
+## Prerequisites
+
+- [Bun](https://bun.sh) 1.x
+- PostgreSQL 12+
+
+## Setup
+
+```bash
+# 1. Install dependencies
+bun install
+
+# 2. Copy env and adjust credentials
+cp .env.example .env
+
+# 3. Create database (once)
+createdb syskv
+# or: CREATE DATABASE syskv;
+
+# 4. Generate Prisma client + push schema to DB
+bun run db:generate
+bun run db:push
+
+# 5a. Backend API on :3001
+bun run server
+
+# 5b. Frontend on :5173 (proxies /api → :3001)
+bun run dev
+```
+
+Open http://localhost:5173.
+
+## Scripts
+
+| Script | Description |
+|--------|-------------|
+| `bun run dev` | Vite dev server (frontend) |
+| `bun run server` | Bun + Elysia API server |
+| `bun run build` | Build frontend |
+| `bun run lint` | Oxlint |
+| `bun test` | Run Bun tests |
+| `bun test --watch` | Watch mode |
+| `bun run test:load` | Run Grafana k6 load test |
+| `bun run db:generate` | Generate Prisma client |
+| `bun run db:push` | Push schema to DB |
+| `bun run db:studio` | Prisma Studio UI |
+
+## Testing
+
+### Bun Test (unit + integration)
+
+Unit tests cover the markdown renderer and helpers; integration tests hit the API through Elysia's `app.handle()` (no port needed) against your local DB, and clean up after themselves.
+
+```bash
+bun test
+```
+
+Test files:
+
+- `test/markdown.test.ts` — markdown rendering, backlinks, word count, highlight, helpers
+- `test/api.test.ts` — health, notes CRUD (incl. soft-delete via `trashed`), settings upsert/read, 404 cases
+
+### Grafana k6 (load testing)
+
+> Requires the **k6** binary: `winget install k6` or https://grafana.com/docs/k6/latest/get-started/installation/
+
+With the API server running, run the load test:
+
+```bash
+bun run test:load
+```
+
+What it does:
+
+- **smoke** scenario — 1 VU × 10s, checks `/api/health`
+- **load** scenario — ramps 0 → 10 → 20 VUs over 60s, each iteration runs a full CRUD cycle (create → list → get → update → delete), so it is **self-cleaning**
+
+Thresholds (fail the run if breached):
+
+- error rate `< 1%`
+- latency `p95 < 300ms`, `p99 < 600ms`
+
+Override the target server:
+
+```bash
+BASE_URL=https://your-deployed-api.example.com/api k6 run test/load/api.k6.js
+```
+
+## Docker
+
+Multi-stage `Dockerfile` (build frontend → slim runtime on `oven/bun`) + `compose.yaml` with PostgreSQL.
+
+```bash
+# Prerequisites: Docker Desktop with WSL2
+# First run pulls images + builds (a few minutes)
+
+docker compose up --build -d
+```
+
+- App served at http://localhost:3001 (frontend **and** `/api/*` from one container)
+- PostgreSQL runs in `db` container with a persistent volume (`pgdata`)
+- On startup, the app runs `prisma db push` automatically (schema sync)
+- Set `POSTGRES_PASSWORD` (default `postgres`) for the DB password
+
+Other commands:
+
+```bash
+docker compose logs -f app     # follow app logs
+docker compose down            # stop containers (keeps data)
+docker compose down -v         # stop + wipe database volume
+```
+
+Deployment target: **Coolify** (bring-your-own-Dockerfile) — see roadmap below.
+
+## API Endpoints
+
+### Notes
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/notes` | List (query: `view=all\|pinned\|trash`, `search`, `tag`, `notebook`) |
+| GET | `/api/notes/:id` | Get one |
+| POST | `/api/notes` | Create |
+| PUT | `/api/notes/:id` | Update (incl. `trashed` for soft-delete) |
+| DELETE | `/api/notes/:id` | Delete permanently |
+
+### Settings
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/settings` | Get all settings |
+| GET | `/api/settings/:key` | Get one |
+| PUT | `/api/settings/:key` | Upsert a value |
+
+### Health
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/health` | `{ status: "ok" }` |
+
+## Postman
+
+Collection + environment in `postman/`. Import both, select the **Syskv Local** environment, and run requests in order to exercise the chained `noteId` variable. See [Testing with Postman](#api-testing).
+
+## Project Structure
 
 ```
-npx serve .
+├── src/               # React frontend
+│   ├── components/    # Sidebar, NoteGrid, Editor, modals, palette...
+│   ├── hooks/         # useNotes, useSettings
+│   ├── api/           # fetch client for the REST API
+│   ├── utils/         # markdown renderer, helpers
+│   ├── styles/        # CSS (light/dark, responsive)
+│   └── types.ts       # shared TS types
+├── server/            # Bun + Elysia backend
+│   ├── app.ts         # Elysia app (exported for tests)
+│   ├── index.ts       # entry — binds the port
+│   ├── db/            # prisma client
+│   └── routes/        # notes, settings
+├── prisma/            # schema.prisma
+├── test/              # bun tests + k6 load script
+├── postman/           # Postman collection + environment
+└── package.json
 ```
 
-> Note: Notes are stored per-browser via `localStorage`. Clearing browser data removes notes — use **Backup** to keep a copy.
+## Database Schema
 
-## GitHub Pages Deployment (free)
+`prisma/schema.prisma` — models: `Note`, `Setting`, `Notified`.
 
-1. Create a repo on GitHub and push these files.
-2. **Repo → Settings → Pages → Source** → pick your branch + `/ (root)`, Save.
-3. Done — it's live at `https://<username>.github.io/<repo-name>/`.
-   - PWA + notifications activate automatically over HTTPS.
+## Roadmap / Next Steps
 
-## Notes on limitations
-
-- **Reminders**: notifications only fire while the app/tab is open. For background reminders you'd need a push server (Service Worker push, Firebase).
-- **Sync across devices / accounts**: not included by default. To add it, connect Firebase or Supabase (both have free tiers) and swap the `loadJSON`/`persistAll` functions for their realtime database calls. Everything else stays the same.
+- Add TanStack Query to replace manual fetch state
+- User authentication (multi-user)
+- Real-time sync (Supabase/Firebase or WebSockets)
+- Push notifications (background reminders)
+- Elysia Swagger (`@elysiajs/swagger`) for live API docs
+- Docker + Coolify deploy, Cloudflare CDN, Grafana observability

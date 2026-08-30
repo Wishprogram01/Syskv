@@ -1,0 +1,396 @@
+{
+  "info": {
+    "name": "Syskv Notes API",
+    "description": "REST API for Syskv Notes (Bun + Elysia + Prisma). Import this collection, then import the Syskv_Local environment and select it.\n\nSetup:\n1. bun run db:push\n2. bun run server\n\nEndpoints covered: health, notes CRUD, settings.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "GET /api/health",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Server is ok', function () {",
+                  "  pm.expect(pm.response.json().status).to.eql('ok');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Notes",
+      "item": [
+        {
+          "name": "GET /api/notes (list)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Returns an array of notes', function () {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(Array.isArray(body)).to.be.true;",
+                  "});",
+                  "",
+                  "pm.test('Each note has required fields', function () {",
+                  "  const body = pm.response.json();",
+                  "  if (body.length > 0) {",
+                  "    const first = body[0];",
+                  "    ['id', 'title', 'body', 'tags', 'pinned', 'trashed'].forEach(f => pm.expect(first).to.have.property(f));",
+                  "  }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notes?view=all&search=&tag=&notebook=",
+              "host": ["{{baseUrl}}"],
+              "path": ["notes"],
+              "query": [
+                {
+                  "key": "view",
+                  "value": "all",
+                  "description": "Filter: all | pinned | trash"
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "description": "Text search on title/body",
+                  "disabled": true
+                },
+                {
+                  "key": "tag",
+                  "value": "",
+                  "description": "Filter by tag",
+                  "disabled": true
+                },
+                {
+                  "key": "notebook",
+                  "value": "",
+                  "description": "Filter by notebook",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST /api/notes (create)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Created note has an id', function () {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body).to.have.property('id');",
+                  "  pm.expect(body.title).to.eql(pm.request.body.raw ? JSON.parse(pm.request.body.raw).title : '');",
+                  "});",
+                  "",
+                  "pm.test('Save note id for later requests', function () {",
+                  "  pm.collectionVariables.set('noteId', pm.response.json().id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Hello from Postman\",\n  \"body\": \"This is a **test** note created via Postman.\\n\\nTry backlinks: [[Another Note]]\",\n  \"tags\": [\"test\", \"api\"],\n  \"notebook\": \"Postman\",\n  \"color\": \"#3b82f6\",\n  \"due\": null,\n  \"pinned\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/notes",
+              "host": ["{{baseUrl}}"],
+              "path": ["notes"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /api/notes/:id (one)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Returns the requested note', function () {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.id).to.eql(pm.collectionVariables.get('noteId'));",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notes/{{noteId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["notes", "{{noteId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PUT /api/notes/:id (update)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Note is updated', function () {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.title).to.eql('Updated via Postman');",
+                  "  pm.expect(body.pinned).to.eql(true);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated via Postman\",\n  \"body\": \"Updated body with a new line.\\n- item one\\n- item two\",\n  \"tags\": [\"test\", \"updated\"],\n  \"pinned\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/notes/{{noteId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["notes", "{{noteId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE /api/notes/:id",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 204 No Content', function () {",
+                  "  pm.response.to.have.status(204);",
+                  "});",
+                  "",
+                  "pm.test('Cleanup collection variable', function () {",
+                  "  pm.collectionVariables.unset('noteId');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notes/{{noteId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["notes", "{{noteId}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Settings",
+      "item": [
+        {
+          "name": "GET /api/settings (all)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Returns an object', function () {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(typeof body).to.eql('object');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/settings",
+              "host": ["{{baseUrl}}"],
+              "path": ["settings"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /api/settings/:key (one)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/settings/dark",
+              "host": ["{{baseUrl}}"],
+              "path": ["settings", "dark"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PUT /api/settings/:key (upsert)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Returns success true', function () {",
+                  "  pm.expect(pm.response.json().success).to.eql(true);",
+                  "});",
+                  "",
+                  "pm.test('Value persisted', function () {",
+                  "  pm.sendRequest({",
+                  "    url: '{{baseUrl}}/settings/dark',",
+                  "    method: 'GET'",
+                  "  }, function (err, res) {",
+                  "    pm.expect(err).to.eql(null);",
+                  "    pm.expect(res.json()).to.eql(true);",
+                  "  });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"value\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/settings/dark",
+              "host": ["{{baseUrl}}"],
+              "path": ["settings", "dark"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3001/api"
+    },
+    {
+      "key": "noteId",
+      "value": ""
+    }
+  ]
+}

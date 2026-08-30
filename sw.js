@@ -1,16 +1,8 @@
-const CACHE = "syskv-notes-v1";
-const ASSETS = [
-  "./",
-  "./index.html",
-  "./style.css",
-  "./script.js",
-  "./manifest.webmanifest",
-  "./icon.svg"
-];
+const CACHE = "syskv-notes-v2";
 
 self.addEventListener("install", (e) => {
   e.waitUntil(
-    caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting())
+    caches.open(CACHE).then((c) => c.addAll(["./", "./index.html"])).then(() => self.skipWaiting())
   );
 });
 

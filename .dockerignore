@@ -1,0 +1,11 @@
+node_modules
+dist
+dist-server
+.git
+.idea
+.env
+*.log
+test
+postman
+image
+tsconfig*.tsbuildinfo

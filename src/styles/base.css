@@ -1,0 +1,126 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+  /* Color — shell & surfaces */
+  --color-shell: #180D33;
+  --color-shell-soft: #241547;
+  --color-surface: #FFFFFF;
+  --color-surface-muted: #F6F3FB;
+
+  /* Color — brand */
+  --color-primary: #6C3BFF;
+  --color-primary-hover: #5726E8;
+  --color-accent: #4C8DFF;
+
+  /* Color — text */
+  --color-text: #201B2C;
+  --color-text-muted: #716B80;
+  --color-text-on-shell: #F2EFF9;
+  --color-text-on-shell-muted: #A79FC4;
+
+  /* Color — status */
+  --color-success: #168A5A;
+  --color-warning: #C78318;
+  --color-danger: #D9485F;
+
+  /* Radius */
+  --radius-card: 20px;
+  --radius-control: 14px;
+  --radius-pill: 999px;
+
+  /* Elevation */
+  --shadow-card: 0 16px 48px rgba(31, 15, 72, 0.12);
+  --shadow-card-hover: 0 20px 56px rgba(31, 15, 72, 0.18);
+  --shadow-float: 0 24px 64px rgba(15, 8, 40, 0.28);
+
+  /* Spacing scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* Motion */
+  --motion-fast: 180ms;
+  --motion-base: 240ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Legacy aliases (kept for existing rules) */
+  --bg: var(--color-surface-muted);
+  --card: var(--color-surface);
+  --text: var(--color-text);
+  --muted: var(--color-text-muted);
+  --accent: var(--color-primary);
+  --accent-hover: var(--color-primary-hover);
+  --danger: var(--color-danger);
+  --border: #E9E4F4;
+  --sidebar-bg: var(--color-shell);
+  --hover: rgba(108, 59, 255, 0.08);
+  --shadow: var(--shadow-card);
+  --code-bg: #F0EBFA;
+  --ring: rgba(108, 59, 255, 0.22);
+
+  /* Typography scale */
+  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --fs-display: clamp(36px, 5vw, 52px);
+  --fs-h1: clamp(30px, 4vw, 42px);
+  --fs-h2: 26px;
+  --fs-body-lg: 18px;
+  --fs-body: 15px;
+  --fs-label: 13px;
+}
+
+body.dark {
+  --color-surface: #211A38;
+  --color-surface-muted: #171130;
+  --border: #352C55;
+  --hover: rgba(167, 143, 255, 0.10);
+  --shadow-card: 0 16px 48px rgba(0, 0, 0, 0.45);
+  --shadow-card-hover: 0 20px 56px rgba(0, 0, 0, 0.55);
+  --code-bg: #2B2248;
+  --ring: rgba(139, 99, 255, 0.35);
+
+  --bg: var(--color-surface-muted);
+  --card: var(--color-surface);
+  --text: #EDEAF6;
+  --muted: #9E96BC;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { font-size: 16px; }
+
+body {
+  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  transition: background var(--motion-base) ease-in-out, color var(--motion-base) ease-in-out;
+}
+
+h1, h2, h3 { line-height: 1.25; letter-spacing: -0.01em; }
+
+.muted { color: var(--muted); }
+.small { font-size: 12px; }
+.hidden { display: none !important; }
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+::selection { background: rgba(108, 59, 255, 0.25); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
