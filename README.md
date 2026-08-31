@@ -42,20 +42,30 @@ Phases yang **telah selesai (✅)**, dikelaskan mengikut kategori. Setiap katego
 |-------|--------------|--------|
 | **8** | Container — Docker (Dockerfile + compose) | ✅ |
 
+### 🚀 DevOps (Phase 9)
+
+| Phase | Layer / Tech | Status |
+|-------|--------------|--------|
+| **9** | DevOps — GitHub Actions (CI/CD) + ghcr.io | ✅ |
+
+### 📊 Monitoring (Phase 11)
+
+| Phase | Layer / Tech | Status |
+|-------|--------------|--------|
+| **11** | Monitoring — Pino + OpenTelemetry + Alloy + Loki + Tempo + Grafana | ✅ |
+
 ### ⏭️ Fasa Akan Datang
 
 | Phase | Layer / Tech | Status |
 |-------|--------------|--------|
-| **9** | DevOps — GitHub Actions (CI/CD) + Coolify (deploy) | ⏳ |
-| **10** | CDN — Cloudflare (performance + security) | ⏳ |
-| **11** | Monitoring — Pino + OpenTelemetry + Alloy + Loki + Tempo + Grafana | ⏳ |
+| **10** | CDN — Cloudflare (performance + security) | ⏭️ Skip |
 
 **Catatan:**
 
 - **Bun phase** = **Phase 3** (Backend runtime). Bun Test pula = **Phase 6**.
 - **Docker phase** = **Phase 8** (Container).
 - **TanStack** = sebahagian **Phase 4** (data fetching/ORM) — belum dipasang, sedang menunggu.
-- Next: **Phase 9 — DevOps** (GitHub Actions + Coolify).
+- **Cloudflare CDN** = **Phase 10** — skipped, boleh added bila dah deploy ke VPS.
 
 ## Prerequisites
 
@@ -102,6 +112,8 @@ Open http://localhost:5173.
 | `bun run db:generate` | Generate Prisma client |
 | `bun run db:push` | Push schema to DB |
 | `bun run db:studio` | Prisma Studio UI |
+| `bun run monitoring` | Start Grafana stack (Loki + Tempo + Alloy + Grafana) |
+| `bun run monitoring:down` | Stop Grafana stack |
 
 ## Testing
 
@@ -169,6 +181,32 @@ docker compose down -v         # stop + wipe database volume
 ```
 
 Deployment target: **Coolify** (bring-your-own-Dockerfile) — see roadmap below.
+
+## Monitoring (Grafana Stack)
+
+Local monitoring stack: **Loki** (logs) + **Tempo** (traces) + **Alloy** (collector) + **Grafana** (dashboard).
+
+```bash
+bun run monitoring          # start stack
+bun run monitoring:down     # stop stack
+```
+
+Services (after start):
+
+| Service | URL | Credentials |
+|---------|-----|-------------|
+| Grafana | http://localhost:3000 | admin / admin |
+| Loki | http://localhost:3100 | — |
+| Tempo | http://localhost:3200 | — |
+| Alloy | http://localhost:12345 | — |
+
+**Grafana login:** `admin` / `admin` (anonymous access enabled).
+
+Data sources auto-provisioned: Loki (logs) + Tempo (traces). Open Grafana → Explore → select Loki/Tempo datasource to query.
+
+**Trace export:** The API server sends OTLP traces to Alloy on `http://localhost:4318` (configurable via `OTEL_EXPORTER_OTLP_ENDPOINT` env var). Traces flow: App → Alloy → Tempo.
+
+**Log export:** Add `pino-loki` or forward pino JSON stdout to Loki via Alloy push endpoint.
 
 ## API Endpoints
 

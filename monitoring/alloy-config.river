@@ -1,0 +1,52 @@
+logging {
+  level = "info"
+}
+
+// Loki log receiver (OTLP)
+loki.receiver "otlp" {
+  http {
+    endpoint = "0.0.0.0:12345"
+  }
+}
+
+// Loki receiver — push from app via HTTP
+loki.receiver "push" {
+  http {
+    endpoint = "0.0.0.0:12345"
+  }
+}
+
+// Forward logs to Loki
+loki.write "loki" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}
+
+// Tempo trace receiver
+otelcol.receiver "otlp" {
+  debug_metrics {
+    disable_high_cardinality_metrics = true
+  }
+
+  output {
+    traces = [otelcol.processor.batch.default.input]
+  }
+}
+
+// Batch traces before sending
+otelcol.processor "batch" {
+  output {
+    traces = [otelcol.exporter.otlp.tempo.input]
+  }
+}
+
+// Export traces to Tempo
+otelcol.exporter "otlp" "tempo" {
+  client {
+    endpoint = "tempo:4317"
+    tls {
+      insecure = true
+    }
+  }
+}

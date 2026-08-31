@@ -13,6 +13,8 @@
     "test": "bun test",
     "test:watch": "bun test --watch",
     "test:load": "k6 run test/load/api.k6.js",
+    "monitoring": "docker compose -f docker-compose.monitoring.yml up -d",
+    "monitoring:down": "docker compose -f docker-compose.monitoring.yml down",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:studio": "prisma studio"
