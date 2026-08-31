@@ -1,6 +1,7 @@
 import { Elysia, t } from 'elysia';
 import prisma from '../db/prisma.ts';
 import { Note, CreateNoteInput, UpdateNoteInput } from '../../src/types/index.ts';
+import { logger } from '../logger.ts';
 
 const notesRoute = new Elysia({ prefix: '/api/notes' });
 
@@ -40,6 +41,8 @@ notesRoute.get('/', async ({ query }) => {
     ],
   });
 
+  logger.debug({ count: notes.length, view, search }, 'GET /api/notes');
+
   return notes.map((row) => ({
     id: row.id,
     title: row.title,
@@ -68,8 +71,11 @@ notesRoute.get('/:id', async ({ params }) => {
   });
 
   if (!note) {
+    logger.warn({ id: params.id }, 'Note not found');
     return new Response(JSON.stringify({ error: 'Note not found' }), { status: 404 });
   }
+
+  logger.debug({ id: params.id }, 'GET /api/notes/:id');
 
   return {
     id: note.id,
@@ -103,6 +109,8 @@ notesRoute.post('/', async ({ body }) => {
       updated: now,
     },
   });
+
+  logger.info({ id: note.id, title: note.title }, 'POST /api/notes — created');
 
   return {
     id: note.id,
@@ -148,6 +156,8 @@ notesRoute.put('/:id', async ({ params, body }) => {
     data,
   });
 
+  logger.info({ id: params.id }, 'PUT /api/notes/:id — updated');
+
   return {
     id: note.id,
     title: note.title,
@@ -178,6 +188,8 @@ notesRoute.delete('/:id', async ({ params }) => {
   await prisma.note.delete({
     where: { id: params.id },
   });
+
+  logger.info({ id: params.id }, 'DELETE /api/notes/:id — deleted');
 
   return new Response(null, { status: 204 });
 });
