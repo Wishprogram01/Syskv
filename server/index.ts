@@ -1,5 +1,8 @@
 import { app } from './app.ts';
 import { logger } from './logger.ts';
+import { startTelemetry } from './telemetry.ts';
+
+startTelemetry();
 
 const PORT = process.env.PORT || 3001;
 
